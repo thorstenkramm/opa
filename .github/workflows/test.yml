@@ -1,0 +1,32 @@
+---
+name: Test and Lint
+on:
+  - push
+jobs:
+  test:
+    name: Test and Lint
+    runs-on: ubuntu-24.04
+    # https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
+    # Ubuntu 24.04 comes with MySQL 8.0.42
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          sudo apt-get update
+          sudo apt-get install -y flake8 python3-pytest zip
+          sudo .github/scripts/setup_mysql.sh
+          URL=https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-8.0.35-33/binary/\
+          debian/noble/x86_64/percona-xtrabackup-80_8.0.35-33-1.noble_amd64.deb
+          wget "$URL"
+          sudo apt -y install ./percona-xtrabackup-80_8.0.35-33-1.noble_amd64.deb
+          rm ./percona-xtrabackup-80_8.0.35-33-1.noble_amd64.deb
+
+      - name: Lint with flake8
+        run: |
+          flake8 -v .
+
+      - name: Test with pytest
+        run: |
+          echo "0.0.0-src" > VERSION
+          sudo python3 -m pytest tests/ -v -s

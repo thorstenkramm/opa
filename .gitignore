@@ -1,0 +1,15 @@
+CLAUDE.md
+opa.conf
+opa
+opa.pyz
+opa.tar.gz
+/run_tests_mysql57.sh
+/.idea/dictionaries/project.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/opa.iml
+/.idea/vcs.xml
+/.idea/yamllint.xml

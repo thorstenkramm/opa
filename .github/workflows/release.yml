@@ -1,0 +1,47 @@
+---
+name: Release OPA
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build-and-release:
+    name: Release OPA
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          sudo apt-get update
+          sudo apt-get install -y zip
+
+      - name: Build OPA
+        run: |
+          chmod +x .github/scripts/build.sh
+          echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+          sed -i "s/0.*src/$GITHUB_REF_NAME/g" version.py
+          cat version.py
+          .github/scripts/build.sh
+          tar cvzf opa-${GITHUB_REF_NAME}.tar.gz opa.pyz opa.conf.example
+          ls -l
+          env
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: OPA v${{ env.VERSION }}
+          draft: false
+          prerelease: false
+          make_latest: true
+          files: opa-*.tar.gz
+          body: |
+            Optimized Percona-Xtrabackup Archiver v${{ env.VERSION }}
