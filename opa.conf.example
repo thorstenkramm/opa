@@ -57,6 +57,11 @@ backup_dir = "/tmp/mysql_backup"
 # Default: info
 #log_level = "debug"
 
+# By default the xtrabackup version is validated before each backup.
+# You can skip this check on your own risk.
+# Default: true
+#check_xtrabackup_version = false
+
 [conditions]
 # List of commands executed with /bin/sh before the backup starts.
 # If any of the commands defined in the skip_conditions list exits with exit code 0,

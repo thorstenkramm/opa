@@ -16,8 +16,13 @@ Key features at a glance:
 - Option to run additional commands before and after the backup
 - Distributed as a single-file Python zipap
 - Prevention of running backups without sufficient disk space
+- Automates the installation of the required version of Percona Xtrabackup
 
-Refer to the [example of the configuration file](./opa.conf.example):
+Refer to the [example of the configuration file](./opa.conf.example).
+
+> [!IMPORTANT]
+> The OPA backup script is suitable for debian-based distributions only.
+> Debian 11/Ubuntu 22.04 or newer is required.
 
 ## Installation
 
@@ -57,7 +62,8 @@ OPA supports the following backup strategies:
    logs.
    This backup is not suitable to to start MySQL because the transaction log has not been written to the tables yet.
    The so-called prepare step is missing. A "regular" backup consumes the same disk space as your database. The backup
-   consists of a folder with almost the same files as in the MySQL data directory.
+   consists of a folder with almost the same files as in the MySQL data directory. For a restore the XtraBackup
+   utility is required. 
 2. **Regular+Prepare**: After tables and logs have been copied to the destination, the prepare job is run, resulting in a
    directory that can be used to start MySQL directly. The prepare job doesn't consume additional disk space. To restore a lost
    database, the XtraBackup utility is not required.
@@ -68,7 +74,7 @@ OPA supports the following backup strategies:
    directly on the backup. As the backup is streamed to the target file, no extra disk or temporary space is required
    for additional preparation steps.  
    For a restore the XtraBackup and the
-   [qpress utility](https://ftpmirror.your.org/pub/percona/pxc-80/apt/pool/main/q/qpress/) are required.  
+   [qpress utility](https://ftpmirror.your.org/pub/percona/pxc-80/apt/pool/main/q/qpress/) utilities are required.  
    Use `streamcompress = true` in the [opa.conf](./opa.conf.example).
 
 Optionally the folder created by the strategies 1 and 2 can be compressed into a single tar.gz file. Keep in mind, that

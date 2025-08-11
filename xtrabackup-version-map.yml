@@ -1,0 +1,63 @@
+# Find the right version of Xtrabackup for your distribution and MySQL Server
+# 
+# XtraBackup Compatibility:
+# - XtraBackup 2.4: Supports MySQL 5.6.x and 5.7.x (EOL as of November 2023)
+# - XtraBackup 8.0: Supports MySQL 8.0.34+ (cannot backup MySQL 5.x or 8.4+)
+# - XtraBackup 8.4: Supports MySQL 8.4.x LTS (cannot backup MySQL 8.0.x or earlier)
+#
+# Note: When a package doesn't exist for a newer distribution, we use the package from
+# the previous compatible distribution (e.g., Ubuntu 24.04 uses jammy package for XtraBackup 2.4)
+---
+debian:
+  "11":  # bullseye
+    mysql:
+      # MySQL 5.6.x and 5.7.x use XtraBackup 2.4
+      "5.6": https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/binary/debian/bullseye/x86_64/percona-xtrabackup-24_2.4.29-1.bullseye_amd64.deb
+      "5.7": https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/binary/debian/bullseye/x86_64/percona-xtrabackup-24_2.4.29-1.bullseye_amd64.deb
+      # MySQL 8.0.x and 8.2.x use XtraBackup 8.0
+      "8.0": https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-8.0.35-33/binary/debian/bullseye/x86_64/percona-xtrabackup-80_8.0.35-33-1.bullseye_amd64.deb
+      "8.2": https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-8.0.35-33/binary/debian/bullseye/x86_64/percona-xtrabackup-80_8.0.35-33-1.bullseye_amd64.deb
+      # MySQL 8.4.x uses XtraBackup 8.4
+      "8.4": https://downloads.percona.com/downloads/Percona-XtraBackup-8.4/Percona-XtraBackup-8.4.0-3/binary/debian/bullseye/x86_64/percona-xtrabackup-84_8.4.0-3-1.bullseye_amd64.deb
+  "12":  # bookworm
+    mysql:
+      # MySQL 5.6.x and 5.7.x use XtraBackup 2.4
+      "5.6": https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/binary/debian/bookworm/x86_64/percona-xtrabackup-24_2.4.29-1.bookworm_amd64.deb
+      "5.7": https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/binary/debian/bookworm/x86_64/percona-xtrabackup-24_2.4.29-1.bookworm_amd64.deb
+      # MySQL 8.0.x and 8.2.x use XtraBackup 8.0
+      "8.0": https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-8.0.35-33/binary/debian/bookworm/x86_64/percona-xtrabackup-80_8.0.35-33-1.bookworm_amd64.deb
+      "8.2": https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-8.0.35-33/binary/debian/bookworm/x86_64/percona-xtrabackup-80_8.0.35-33-1.bookworm_amd64.deb
+      # MySQL 8.4.x uses XtraBackup 8.4
+      "8.4": https://downloads.percona.com/downloads/Percona-XtraBackup-8.4/Percona-XtraBackup-8.4.0-3/binary/debian/bookworm/x86_64/percona-xtrabackup-84_8.4.0-3-1.bookworm_amd64.deb
+
+ubuntu:
+  "20.04":  # focal
+    mysql:
+      # MySQL 5.6.x and 5.7.x use XtraBackup 2.4
+      "5.6": https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/binary/debian/focal/x86_64/percona-xtrabackup-24_2.4.29-1.focal_amd64.deb
+      "5.7": https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/binary/debian/focal/x86_64/percona-xtrabackup-24_2.4.29-1.focal_amd64.deb
+      # MySQL 8.0.x and 8.2.x use XtraBackup 8.0
+      "8.0": https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-8.0.35-33/binary/debian/focal/x86_64/percona-xtrabackup-80_8.0.35-33-1.focal_amd64.deb
+      "8.2": https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-8.0.35-33/binary/debian/focal/x86_64/percona-xtrabackup-80_8.0.35-33-1.focal_amd64.deb
+      # MySQL 8.4.x uses XtraBackup 8.4
+      "8.4": https://downloads.percona.com/downloads/Percona-XtraBackup-8.4/Percona-XtraBackup-8.4.0-3/binary/debian/focal/x86_64/percona-xtrabackup-84_8.4.0-3-1.focal_amd64.deb
+  "22.04":  # jammy
+    mysql:
+      # MySQL 5.6.x and 5.7.x use XtraBackup 2.4
+      "5.6": https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/binary/debian/jammy/x86_64/percona-xtrabackup-24_2.4.29-1.jammy_amd64.deb
+      "5.7": https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/binary/debian/jammy/x86_64/percona-xtrabackup-24_2.4.29-1.jammy_amd64.deb
+      # MySQL 8.0.x and 8.2.x use XtraBackup 8.0
+      "8.0": https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-8.0.35-33/binary/debian/jammy/x86_64/percona-xtrabackup-80_8.0.35-33-1.jammy_amd64.deb
+      "8.2": https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-8.0.35-33/binary/debian/jammy/x86_64/percona-xtrabackup-80_8.0.35-33-1.jammy_amd64.deb
+      # MySQL 8.4.x uses XtraBackup 8.4
+      "8.4": https://downloads.percona.com/downloads/Percona-XtraBackup-8.4/Percona-XtraBackup-8.4.0-3/binary/debian/jammy/x86_64/percona-xtrabackup-84_8.4.0-3-1.jammy_amd64.deb
+  "24.04":  # noble
+    mysql:
+      # MySQL 5.6.x and 5.7.x use XtraBackup 2.4 (using jammy package as noble doesn't have 2.4)
+      "5.6": https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/binary/debian/jammy/x86_64/percona-xtrabackup-24_2.4.29-1.jammy_amd64.deb
+      "5.7": https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/binary/debian/jammy/x86_64/percona-xtrabackup-24_2.4.29-1.jammy_amd64.deb
+      # MySQL 8.0.x and 8.2.x use XtraBackup 8.0
+      "8.0": https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-8.0.35-33/binary/debian/noble/x86_64/percona-xtrabackup-80_8.0.35-33-1.noble_amd64.deb
+      "8.2": https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-8.0.35-33/binary/debian/noble/x86_64/percona-xtrabackup-80_8.0.35-33-1.noble_amd64.deb
+      # MySQL 8.4.x uses XtraBackup 8.4
+      "8.4": https://downloads.percona.com/downloads/Percona-XtraBackup-8.4/Percona-XtraBackup-8.4.0-3/binary/debian/noble/x86_64/percona-xtrabackup-84_8.4.0-3-1.noble_amd64.deb

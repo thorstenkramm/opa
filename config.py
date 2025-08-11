@@ -51,6 +51,7 @@ class Config:
     prepare: bool
     tgz: bool
     log_level: str
+    check_xtrabackup_version: bool
     zbx: ZbxConfig
     conditions: ConditionsConfig
 
@@ -148,6 +149,8 @@ def get_config(config_file: str) -> Config:
         tgz=tgz,
         # Default: "info"
         log_level=main_config.get("log_level", "info"),
+        # Default: True (check xtrabackup version by default)
+        check_xtrabackup_version=main_config.get("check_xtrabackup_version", True),
         zbx=ZbxConfig(
             item_key=zbx_config.get("item_key", ""),
             sender_bin=zbx_config.get("sender_bin", "zabbix_sender"),

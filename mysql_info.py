@@ -1,6 +1,7 @@
 import os.path
 import subprocess
 from datetime import datetime
+import re
 
 from dir_info import get_dir_last_change, get_dir_info
 
@@ -49,3 +50,25 @@ class MySQLInfo:
     def get_database_last_change(self, database) -> datetime:
         database_dir = os.path.join(self.data_dir.path, database)
         return get_dir_last_change(database_dir)
+
+    def get_mysql_version(self) -> str:
+        """
+        Get the MySQL server version.
+
+        Returns:
+            str: MySQL version in format "major.minor" (e.g., "8.0", "5.7")
+        """
+        # Execute SQL query to get the MySQL version
+        cmd = [self.mysql_bin, "-N", "-e", "SELECT VERSION()"]
+
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+
+        # Parse the version string (e.g., "8.0.35-0ubuntu0.22.04.1" -> "8.0")
+        version_string = result.stdout.strip()
+
+        # Extract major.minor version using regex
+        match = re.match(r'^(\d+\.\d+)', version_string)
+        if match:
+            return match.group(1)
+        else:
+            raise ValueError(f"Unable to parse MySQL version from: {version_string}")

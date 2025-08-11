@@ -214,6 +214,100 @@ class TestMySQLInfo(unittest.TestCase):
         with self.assertRaises(subprocess.CalledProcessError):
             MySQLInfo()  # Error should occur during __init__ when calling get_databases
 
+    @patch('subprocess.run')
+    def test_get_mysql_version(self, mock_subprocess_run):
+        """
+        Test the get_mysql_version method with various version formats.
+        """
+        # --- Test MySQL 8.0 ---
+        mock_result = MagicMock()
+        mock_result.stdout = '8.0.35-0ubuntu0.22.04.1\n'
+        mock_subprocess_run.return_value = mock_result
+
+        with patch.object(MySQLInfo, 'get_data_dir', return_value='/mock/datadir'), \
+                patch.object(MySQLInfo, 'get_databases', return_value=[]), \
+                patch('mysql_info.get_dir_info', return_value=MockDirInfo('/mock/datadir')):
+            instance = MySQLInfo(mysql_bin='mysql')
+            version = instance.get_mysql_version()
+
+        self.assertEqual(version, '8.0')
+        mock_subprocess_run.assert_called_with(
+            ['mysql', '-N', '-e', 'SELECT VERSION()'],
+            check=True, capture_output=True, text=True
+        )
+
+        # --- Test MySQL 5.7 ---
+        mock_result.stdout = '5.7.42-log\n'
+        mock_subprocess_run.return_value = mock_result
+
+        with patch.object(MySQLInfo, 'get_data_dir', return_value='/mock/datadir'), \
+                patch.object(MySQLInfo, 'get_databases', return_value=[]), \
+                patch('mysql_info.get_dir_info', return_value=MockDirInfo('/mock/datadir')):
+            instance = MySQLInfo()
+            version = instance.get_mysql_version()
+
+        self.assertEqual(version, '5.7')
+
+        # --- Test MySQL 8.4 ---
+        mock_result.stdout = '8.4.0-LTS\n'
+        mock_subprocess_run.return_value = mock_result
+
+        with patch.object(MySQLInfo, 'get_data_dir', return_value='/mock/datadir'), \
+                patch.object(MySQLInfo, 'get_databases', return_value=[]), \
+                patch('mysql_info.get_dir_info', return_value=MockDirInfo('/mock/datadir')):
+            instance = MySQLInfo()
+            version = instance.get_mysql_version()
+
+        self.assertEqual(version, '8.4')
+
+        # --- Test MariaDB 10.6 ---
+        mock_result.stdout = '10.6.12-MariaDB-0ubuntu0.22.04.1\n'
+        mock_subprocess_run.return_value = mock_result
+
+        with patch.object(MySQLInfo, 'get_data_dir', return_value='/mock/datadir'), \
+                patch.object(MySQLInfo, 'get_databases', return_value=[]), \
+                patch('mysql_info.get_dir_info', return_value=MockDirInfo('/mock/datadir')):
+            instance = MySQLInfo()
+            version = instance.get_mysql_version()
+
+        self.assertEqual(version, '10.6')
+
+    @patch('subprocess.run')
+    def test_get_mysql_version_invalid_format(self, mock_subprocess_run):
+        """
+        Test that get_mysql_version raises ValueError for invalid version strings.
+        """
+        mock_result = MagicMock()
+        mock_result.stdout = 'InvalidVersionString\n'
+        mock_subprocess_run.return_value = mock_result
+
+        with patch.object(MySQLInfo, 'get_data_dir', return_value='/mock/datadir'), \
+                patch.object(MySQLInfo, 'get_databases', return_value=[]), \
+                patch('mysql_info.get_dir_info', return_value=MockDirInfo('/mock/datadir')):
+            instance = MySQLInfo()
+
+            with self.assertRaises(ValueError) as context:
+                instance.get_mysql_version()
+
+            self.assertIn('Unable to parse MySQL version', str(context.exception))
+
+    @patch('subprocess.run')
+    def test_get_mysql_version_subprocess_error(self, mock_subprocess_run):
+        """
+        Test that CalledProcessError in get_mysql_version propagates.
+        """
+        mock_subprocess_run.side_effect = subprocess.CalledProcessError(
+            1, 'cmd', stderr='Error getting version'
+        )
+
+        with patch.object(MySQLInfo, 'get_data_dir', return_value='/mock/datadir'), \
+                patch.object(MySQLInfo, 'get_databases', return_value=[]), \
+                patch('mysql_info.get_dir_info', return_value=MockDirInfo('/mock/datadir')):
+            instance = MySQLInfo()
+
+            with self.assertRaises(subprocess.CalledProcessError):
+                instance.get_mysql_version()
+
 
 if __name__ == '__main__':
     unittest.main()

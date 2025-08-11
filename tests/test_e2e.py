@@ -12,18 +12,34 @@ class TestEndToEnd(unittest.TestCase):
         subprocess.run(".github/scripts/build.sh")
         self.databases = ['demo1', 'demo2']
         self.backup_dir = "/tmp/opa"
+        self.installer_file = "/tmp/xtrabackup-installer.txt"
         # Prepare the backup dir
         subprocess.run(f"rm -rf {self.backup_dir} || true", shell=True)
         os.mkdir(self.backup_dir)
         # Prepare the databases
         for database in self.databases:
             print(f"Creating database {database} ...")
-            subprocess.run(f"mysql -e 'DROP DATABASE IF EXISTS {database}; CREATE DATABASE {database}'",
-                           shell=True, check=True)
+            subprocess.run(
+                f"mysql -e 'DROP DATABASE IF EXISTS {database}; CREATE DATABASE {database}'",
+                shell=True,
+                check=True
+            )
             print(f"Filling database {database} with demo data ...")
             subprocess.run(f"mysql {database}< ./test_data/world.sql", shell=True, check=True)
         # Wait for all mysql background write processes to be completed
         time.sleep(4)
+        # Remove Xtrabackup to test installation via OPA
+        get_pkg = subprocess.run(
+            "sudo dpkg -l|grep xtrabackup|awk '{print $2}'",
+            shell=True,
+            check=True,
+            capture_output=True
+        )
+        pkg = get_pkg.stdout.decode("utf-8").strip().replace("\n", "")
+        if pkg != "":
+            subprocess.run(f"sudo apt purge -y {pkg}", shell=True, check=True)
+        if os.path.exists(self.installer_file):
+            os.remove(self.installer_file)
 
     @classmethod
     def tearDownClass(self):
@@ -36,6 +52,18 @@ class TestEndToEnd(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+    def test_00_validation(self):
+        response = subprocess.run(
+            f"./opa -c ./test_data/regular.conf --validate --create-installer {self.installer_file}",
+            shell=True,
+            check=False,
+            capture_output=True
+        )
+        self.assertEqual(response.returncode, 1)
+        self.assertIn("ERROR: XtraBackup not found", response.stdout.decode("utf-8"), 'Error not found')
+        self.assertTrue(os.path.exists(self.installer_file))
+        subprocess.run(f"sh {self.installer_file}", shell=True, check=True)
 
     def test_01_regular(self):
         self.__run_backup('regular')

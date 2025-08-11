@@ -7,7 +7,7 @@ jobs:
     name: Test and Lint
     runs-on: ubuntu-24.04
     # https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
-    # Ubuntu 24.04 comes with MySQL 8.0.42
+    # Ubuntu 24.04 (Noble) comes with MySQL 8.0.42
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
