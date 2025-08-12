@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import patch, MagicMock, mock_open
 import subprocess
+import urllib.request
+import urllib.error
 
 from xtrabackup_info import (
     get_xtrabackup_version,
@@ -8,7 +10,8 @@ from xtrabackup_info import (
     load_version_map,
     get_xtrabackup_download_url,
     get_required_xtrabackup_version,
-    validate_xtrabackup_version
+    validate_xtrabackup_version,
+    XTRABACKUP_VERSION_MAP
 )
 
 
@@ -225,9 +228,11 @@ class TestXtraBackupInfo(unittest.TestCase):
         self.assertEqual(get_required_xtrabackup_version("5.6"), "2.4")
         self.assertEqual(get_required_xtrabackup_version("5.7"), "2.4")
 
-        # MySQL 8.0 and 8.2 require XtraBackup 8.0
+        # MySQL 8.0 requires XtraBackup 8.0
         self.assertEqual(get_required_xtrabackup_version("8.0"), "8.0")
-        self.assertEqual(get_required_xtrabackup_version("8.2"), "8.0")
+
+        # MySQL 8.2 requires XtraBackup 8.2
+        self.assertEqual(get_required_xtrabackup_version("8.2"), "8.2")
 
         # MySQL 8.4 requires XtraBackup 8.4
         self.assertEqual(get_required_xtrabackup_version("8.4"), "8.4")
@@ -346,6 +351,107 @@ class TestXtraBackupInfo(unittest.TestCase):
         self.assertIn("Distribution centos 9", message)
         self.assertIn("not found in XTRABACKUP_VERSION_MAP", message)
         self.assertIsNone(url)
+
+    def test_all_download_urls_are_valid(self):
+        """Test that all download URLs in XTRABACKUP_VERSION_MAP are valid and accessible.
+
+        This test makes HTTP HEAD requests to all unique URLs to ensure:
+        1. The URLs return HTTP 200 (not 404 or other errors)
+        2. Content-Type is application/x-debian-package (proper .deb files)
+        3. Content-Length is > 30MB (not error pages)
+
+        This is critical for the installer feature to work properly.
+        """
+        # Extract all unique URLs from the version map
+        urls = set()
+        for distro_data in XTRABACKUP_VERSION_MAP.values():
+            for version_data in distro_data.values():
+                mysql_versions = version_data.get('mysql', {})
+                for url in mysql_versions.values():
+                    urls.add(url)
+
+        # Sort URLs for consistent test output
+        sorted_urls = sorted(urls)
+
+        print(f"\nValidating {len(sorted_urls)} unique download URLs...")
+
+        # Track failures for better reporting
+        failures = []
+
+        for i, url in enumerate(sorted_urls, 1):
+            # Extract filename for cleaner output
+            filename = url.split('/')[-1]
+            print(f"  [{i}/{len(sorted_urls)}] Testing: {filename}")
+
+            try:
+                # Create a HEAD request to check the URL without downloading
+                request = urllib.request.Request(url, method='HEAD')
+
+                # Add user agent to avoid potential blocking
+                request.add_header('User-Agent', 'opa-test/1.0')
+
+                # Make the request
+                with urllib.request.urlopen(request, timeout=10) as response:
+                    # Check HTTP status code
+                    status_code = response.getcode()
+                    if status_code != 200:
+                        failures.append(f"{filename}: HTTP {status_code} (expected 200)")
+                        continue
+
+                    # Check Content-Type
+                    content_type = response.headers.get('Content-Type', '')
+                    if content_type != 'application/x-debian-package':
+                        failures.append(
+                            f"{filename}: Content-Type is '{content_type}' "
+                            f"(expected 'application/x-debian-package')"
+                        )
+
+                    # Check Content-Length (different minimums for different versions)
+                    content_length_str = response.headers.get('Content-Length', '0')
+                    try:
+                        content_length = int(content_length_str)
+                        # XtraBackup 2.4 packages are smaller (around 8-12MB)
+                        # XtraBackup 8.x packages are larger (around 40-55MB)
+                        if 'xtrabackup-24' in filename:
+                            min_size = 5 * 1024 * 1024  # 5MB for version 2.4
+                        else:
+                            min_size = 30 * 1024 * 1024  # 30MB for version 8.x
+
+                        if content_length < min_size:
+                            size_mb = content_length / (1024 * 1024)
+                            min_size_mb = min_size / (1024 * 1024)
+                            failures.append(
+                                f"{filename}: Size is {size_mb:.1f}MB "
+                                f"(expected > {min_size_mb:.0f}MB, might be an error page)"
+                            )
+                    except ValueError:
+                        failures.append(f"{filename}: Invalid Content-Length: {content_length_str}")
+
+                    # If we got here with no failures, the URL is valid
+                    if not any(filename in f for f in failures):
+                        size_mb = content_length / (1024 * 1024)
+                        print(f"       ✓ Valid: HTTP 200, {content_type}, {size_mb:.1f}MB")
+
+            except urllib.error.HTTPError as e:
+                failures.append(f"{filename}: HTTP {e.code} error - {e.reason}")
+            except urllib.error.URLError as e:
+                failures.append(f"{filename}: URL error - {e.reason}")
+            except Exception as e:
+                failures.append(f"{filename}: Unexpected error - {str(e)}")
+
+        # Report results
+        if failures:
+            print("\nFailed URLs:")
+            for failure in failures:
+                print(f"  ✗ {failure}")
+
+            # Fail the test with detailed information
+            self.fail(
+                f"\n{len(failures)} out of {len(sorted_urls)} URLs failed validation:\n"
+                + "\n".join(f"  - {f}" for f in failures)
+            )
+        else:
+            print(f"\n✓ All {len(sorted_urls)} URLs are valid and accessible")
 
 
 if __name__ == '__main__':

@@ -11,6 +11,8 @@ from typing import Optional, Tuple, Dict
 # Base URLs for different XtraBackup versions
 _BASE_24 = "https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-2.4.29/binary/debian"
 _BASE_80 = "https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-8.0.35-33/binary/debian"
+_BASE_82 = ("https://downloads.percona.com/downloads/Percona-XtraBackup-innovative-release/"
+            "Percona-XtraBackup-8.2.0-1/binary/debian")
 _BASE_84 = "https://downloads.percona.com/downloads/Percona-XtraBackup-8.4/Percona-XtraBackup-8.4.0-3/binary/debian"
 
 XTRABACKUP_VERSION_MAP = {
@@ -20,7 +22,7 @@ XTRABACKUP_VERSION_MAP = {
                 "5.6": f"{_BASE_24}/bullseye/x86_64/percona-xtrabackup-24_2.4.29-1.bullseye_amd64.deb",
                 "5.7": f"{_BASE_24}/bullseye/x86_64/percona-xtrabackup-24_2.4.29-1.bullseye_amd64.deb",
                 "8.0": f"{_BASE_80}/bullseye/x86_64/percona-xtrabackup-80_8.0.35-33-1.bullseye_amd64.deb",
-                "8.2": f"{_BASE_80}/bullseye/x86_64/percona-xtrabackup-80_8.0.35-33-1.bullseye_amd64.deb",
+                "8.2": f"{_BASE_82}/bullseye/x86_64/percona-xtrabackup-82_8.2.0-1-1.bullseye_amd64.deb",
                 "8.4": f"{_BASE_84}/bullseye/x86_64/percona-xtrabackup-84_8.4.0-3-1.bullseye_amd64.deb"
             }
         },
@@ -29,7 +31,7 @@ XTRABACKUP_VERSION_MAP = {
                 "5.6": f"{_BASE_24}/bookworm/x86_64/percona-xtrabackup-24_2.4.29-1.bookworm_amd64.deb",
                 "5.7": f"{_BASE_24}/bookworm/x86_64/percona-xtrabackup-24_2.4.29-1.bookworm_amd64.deb",
                 "8.0": f"{_BASE_80}/bookworm/x86_64/percona-xtrabackup-80_8.0.35-33-1.bookworm_amd64.deb",
-                "8.2": f"{_BASE_80}/bookworm/x86_64/percona-xtrabackup-80_8.0.35-33-1.bookworm_amd64.deb",
+                "8.2": f"{_BASE_82}/bookworm/x86_64/percona-xtrabackup-82_8.2.0-1-1.bookworm_amd64.deb",
                 "8.4": f"{_BASE_84}/bookworm/x86_64/percona-xtrabackup-84_8.4.0-3-1.bookworm_amd64.deb"
             }
         }
@@ -40,7 +42,7 @@ XTRABACKUP_VERSION_MAP = {
                 "5.6": f"{_BASE_24}/focal/x86_64/percona-xtrabackup-24_2.4.29-1.focal_amd64.deb",
                 "5.7": f"{_BASE_24}/focal/x86_64/percona-xtrabackup-24_2.4.29-1.focal_amd64.deb",
                 "8.0": f"{_BASE_80}/focal/x86_64/percona-xtrabackup-80_8.0.35-33-1.focal_amd64.deb",
-                "8.2": f"{_BASE_80}/focal/x86_64/percona-xtrabackup-80_8.0.35-33-1.focal_amd64.deb",
+                "8.2": f"{_BASE_82}/focal/x86_64/percona-xtrabackup-82_8.2.0-1-1.focal_amd64.deb",
                 "8.4": f"{_BASE_84}/focal/x86_64/percona-xtrabackup-84_8.4.0-3-1.focal_amd64.deb"
             }
         },
@@ -49,7 +51,7 @@ XTRABACKUP_VERSION_MAP = {
                 "5.6": f"{_BASE_24}/jammy/x86_64/percona-xtrabackup-24_2.4.29-1.jammy_amd64.deb",
                 "5.7": f"{_BASE_24}/jammy/x86_64/percona-xtrabackup-24_2.4.29-1.jammy_amd64.deb",
                 "8.0": f"{_BASE_80}/jammy/x86_64/percona-xtrabackup-80_8.0.35-33-1.jammy_amd64.deb",
-                "8.2": f"{_BASE_80}/jammy/x86_64/percona-xtrabackup-80_8.0.35-33-1.jammy_amd64.deb",
+                "8.2": f"{_BASE_82}/jammy/x86_64/percona-xtrabackup-82_8.2.0-1-1.jammy_amd64.deb",
                 "8.4": f"{_BASE_84}/jammy/x86_64/percona-xtrabackup-84_8.4.0-3-1.jammy_amd64.deb"
             }
         },
@@ -59,7 +61,8 @@ XTRABACKUP_VERSION_MAP = {
                 "5.6": f"{_BASE_24}/jammy/x86_64/percona-xtrabackup-24_2.4.29-1.jammy_amd64.deb",
                 "5.7": f"{_BASE_24}/jammy/x86_64/percona-xtrabackup-24_2.4.29-1.jammy_amd64.deb",
                 "8.0": f"{_BASE_80}/noble/x86_64/percona-xtrabackup-80_8.0.35-33-1.noble_amd64.deb",
-                "8.2": f"{_BASE_80}/noble/x86_64/percona-xtrabackup-80_8.0.35-33-1.noble_amd64.deb",
+                # MySQL 8.2.x uses XtraBackup 8.2 (using jammy package as noble doesn't have 8.2 yet)
+                "8.2": f"{_BASE_82}/jammy/x86_64/percona-xtrabackup-82_8.2.0-1-1.jammy_amd64.deb",
                 "8.4": f"{_BASE_84}/noble/x86_64/percona-xtrabackup-84_8.4.0-3-1.noble_amd64.deb"
             }
         }
@@ -199,8 +202,10 @@ def get_required_xtrabackup_version(mysql_version: str) -> str:
     # Based on the compatibility rules from the YAML file
     if mysql_version in ["5.6", "5.7"]:
         return "2.4"
-    elif mysql_version in ["8.0", "8.2"]:
+    elif mysql_version in ["8.0"]:
         return "8.0"
+    elif mysql_version in ["8.2"]:
+        return "8.2"
     elif mysql_version == "8.4":
         return "8.4"
     else:
