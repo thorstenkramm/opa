@@ -61,9 +61,8 @@ class ZabbixSender:
         elif backup_result.all_skipped_faulty:
             summary = "Summary: All databases were skipped due to faulty run_conditions. Error=1"
         else:
-            summary = (
-                f"Summary: Successfully backed up all databases. Error=0"
-            )
+            summary = "Summary: Successfully backed up all databases. Error=0"
+
         # with open(self.logger.log_file, 'r', encoding='utf-8') as f:
         file_content = summary + "\n" + self.logger.read_log()
         if len(file_content) < max_bytes:
