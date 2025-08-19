@@ -101,8 +101,8 @@ class XtraBackup:
         """Execute regular XtraBackup (uncompressed copy)"""
         backup_dir = os.path.join(self.store_manager.current_dir.path, "backup")
 
-        # Build XtraBackup command
-        cmd = [
+        # Build XtraBackup command with ulimit prefix
+        cmd_parts = [
             self.config.xtrabackup_bin,
             "--backup",
             f"--target-dir={backup_dir}",
@@ -110,16 +110,20 @@ class XtraBackup:
         ]
 
         # Add any additional XtraBackup options
-        cmd.extend(self.config.xtrabackup_options)
+        cmd_parts.extend(self.config.xtrabackup_options)
 
-        self.logger.info(f"Executing XtraBackup command: {' '.join(cmd)}")
+        # Combine with ulimit command
+        cmd = f"ulimit -n 65536 && {' '.join(cmd_parts)}"
+
+        self.logger.info(f"Executing XtraBackup command: {cmd}")
 
         try:
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
-                check=False
+                check=False,
+                shell=True
             )
 
             if result.returncode != 0:
@@ -185,7 +189,7 @@ class XtraBackup:
         output_file = os.path.join(self.store_manager.current_dir.path, "backup.xbstream")
 
         # Build XtraBackup command with streaming and compression
-        cmd = [
+        cmd_parts = [
             self.config.xtrabackup_bin,
             "--backup",
             "--stream=xbstream",
@@ -195,10 +199,13 @@ class XtraBackup:
         ]
 
         # Add any additional XtraBackup options
-        cmd.extend(self.config.xtrabackup_options)
+        cmd_parts.extend(self.config.xtrabackup_options)
+
+        # Combine with ulimit command
+        cmd = f"ulimit -n 65536 && {' '.join(cmd_parts)}"
 
         self.logger.info(f"Executing XtraBackup streamcompress to {output_file}")
-        self.logger.debug(f"Command: {' '.join(cmd)}")
+        self.logger.debug(f"Command: {cmd}")
 
         try:
             with open(output_file, 'wb') as outfile:
@@ -207,7 +214,8 @@ class XtraBackup:
                     stdout=outfile,
                     stderr=subprocess.PIPE,
                     text=False,
-                    check=False
+                    check=False,
+                    shell=True
                 )
 
             if result.returncode != 0:
