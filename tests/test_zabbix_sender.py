@@ -17,7 +17,7 @@ from logger import new_logger  # noqa: E402
 class TestZabbixSender(unittest.TestCase):
     def setUp(self):
         # Create a sample backup result for testing
-        self.backup_result = BackupResult(total=5, successful=3, failed=1)
+        self.backup_result = BackupResult(total=5, successful=3, failed=0)
 
         # Create a temporary log file for testing
         with NamedTemporaryFile(mode='w', delete=False, suffix='.log') as f:
@@ -108,7 +108,7 @@ class TestZabbixSender(unittest.TestCase):
         sent_content = mock_run.call_args[0][0][6]
 
         # Verify the summary is included
-        self.assertIn("Summary: Successfully dumped 3 of 5 databases", sent_content)
+        self.assertIn("Summary: Successfully backed up all databases. Error=0", sent_content)
 
         # Verify log content is included
         self.assertIn("Small test log content", sent_content)
@@ -145,7 +145,7 @@ class TestZabbixSender(unittest.TestCase):
         self.assertIn(self.log_file, sent_content)  # Should mention the log file path
 
         # Verify summary is still included
-        self.assertIn("Summary: Successfully dumped 3 of 5 databases", sent_content)
+        self.assertIn("Summary: Successfully backed up all databases. Error=0", sent_content)
 
     def test_send_value_no_item_key(self):
         """Test that send_value does nothing when item_key is empty."""

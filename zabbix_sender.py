@@ -54,13 +54,15 @@ class ZabbixSender:
             f"\n** Zabbix item values has been truncated because it exceeds {max_bytes} bytes.**\n"
             f"** Refer to {self.logger.log_file} on the monitored host to get the full report.**\n"
         )
-        if backup_result.all_skipped_successfully:
+        if backup_result.failed > 0:
+            summary = "Summary: Backup failed. Error=1"
+        elif backup_result.all_skipped_successfully:
             summary = "Summary: Successfully skipped all databases due to skip_conditions. Error=0"
         elif backup_result.all_skipped_faulty:
             summary = "Summary: All databases were skipped due to faulty run_conditions. Error=1"
         else:
             summary = (
-                f"Summary: Successfully dumped {backup_result.successful} of {backup_result.total} databases. Error=0"
+                f"Summary: Successfully backed up all databases. Error=0"
             )
         # with open(self.logger.log_file, 'r', encoding='utf-8') as f:
         file_content = summary + "\n" + self.logger.read_log()
