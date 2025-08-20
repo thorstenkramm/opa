@@ -14,7 +14,6 @@ backup_dir = "/tmp/mysql_backup"
 
 # Whether to delete old versions before or after the current backup
 # Default: false (delete old backups after the current backup)
-# Requires: skip_unchanged_dbs = false
 #delete_before = true
 
 # Perform backup using streamcompress. This creates a single archive with all files individually compressed by qpress.

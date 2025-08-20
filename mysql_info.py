@@ -3,7 +3,7 @@ import subprocess
 from datetime import datetime
 import re
 
-from dir_info import get_dir_last_change, get_dir_info
+from dir_info import get_dir_last_change, get_dir_info, get_dir_size
 
 
 class MySQLInfo:
@@ -72,3 +72,24 @@ class MySQLInfo:
             return match.group(1)
         else:
             raise ValueError(f"Unable to parse MySQL version from: {version_string}")
+
+    def get_databases_size(self) -> int:
+        """
+        Get the sum of disk space consumed by all databases.
+
+        Returns:
+            int: Total size in bytes of all non-system databases
+        """
+        total_size = 0
+
+        for database in self.databases:
+            database_dir = os.path.join(self.data_dir.path, database)
+            try:
+                # Get size of this database directory
+                db_size = get_dir_size(database_dir)
+                total_size += db_size
+            except (FileNotFoundError, subprocess.CalledProcessError, ValueError):
+                # Skip databases that can't be accessed (might not have directories)
+                continue
+
+        return total_size

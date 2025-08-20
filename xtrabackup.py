@@ -80,13 +80,14 @@ class XtraBackup:
         # For XtraBackup, we need more space than mysqldump due to the nature of physical backups
         # Regular backup needs approximately the same space as the data directory
         # Streamcompress reduces this significantly
+        database_size = self.mysql_info.get_databases_size()
         if self.config.streamcompress:
-            required_free_bytes = self.mysql_info.data_dir.bytes_used * 0.3  # Estimate 30% for compressed
+            required_free_bytes = database_size * 0.3  # Estimate 30% for compressed
         else:
-            required_free_bytes = self.mysql_info.data_dir.bytes_used * 1.2  # Add 20% buffer for regular
+            required_free_bytes = database_size * 1.2  # Add 20% buffer for regular
             if self.config.tgz:
                 # Need additional space for compression
-                required_free_bytes = self.mysql_info.data_dir.bytes_used * 1.5
+                required_free_bytes = database_size * 1.5
 
         self.logger.info(
             f"Backup will require approximately {format_bytes(required_free_bytes)} bytes. "
