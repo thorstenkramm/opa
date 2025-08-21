@@ -17,6 +17,9 @@ xtrabackup --prepare --target-dir="$TEMP"
 echo " ✅ Prepare completed"
 systemctl stop mysql
 rm -rf /var/lib/mysql/*
+echo " 🚚 Starting copy back ... "
+echo " 🕵️ MySQL datadir:"
+mysql -e "SHOW GLOBAL VARIABLES like 'datadir'"
 xtrabackup --copy-back --target-dir="$TEMP"
 rm -rf "${TEMP}"
 chown -R mysql:mysql /var/lib/mysql
