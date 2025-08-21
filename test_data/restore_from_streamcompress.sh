@@ -15,12 +15,15 @@ echo " ✅ Decompressing completed"
 ls -l "$TEMP"
 xtrabackup --prepare --target-dir="$TEMP"
 echo " ✅ Prepare completed"
+
+DATADIR=$(mysql -Nse "SELECT @@datadir")
+echo " 🕵️ MySQL datadir=${DATADIR}"
+
 systemctl stop mysql
 rm -rf /var/lib/mysql/*
 echo " 🚚 Starting copy back ... "
-echo " 🕵️ MySQL datadir:"
-mysql -e "SHOW GLOBAL VARIABLES like 'datadir'"
-xtrabackup --copy-back --target-dir="$TEMP"
+
+xtrabackup --copy-back --target-dir="$TEMP" --datadir="${DATADIR}"
 rm -rf "${TEMP}"
 chown -R mysql:mysql /var/lib/mysql
 systemctl start mysql
