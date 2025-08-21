@@ -72,9 +72,7 @@ OPA supports the following backup strategies:
    be packaged into a single file with the suffix `.xbstream`. It's similar to a tar file. Inside the package all files
    are individually compresses with qpress. The backup is not "prepared", that means you cannot start your database
    directly on the backup. As the backup is streamed to the target file, no extra disk or temporary space is required
-   for additional preparation steps.  
-   For a restore the XtraBackup and the
-   [qpress utility](https://ftpmirror.your.org/pub/percona/pxc-80/apt/pool/main/q/qpress/) utilities are required.  
+   for additional preparation steps.
    Use `streamcompress = true` in the [opa.conf](./opa.conf.example).
 
 Optionally the folder created by the strategies 1 and 2 can be compressed into a single tar.gz file. Keep in mind, that
@@ -90,6 +88,37 @@ Edit `/etc/opa/opa.conf` to your needs. Then run `opa` from cron.
 > You must run `opa` from a user account – such as root – that has read access to the mysql data directory.
 
 Adding a user to the `mysql` user group is usually not sufficient because the mysql data directory hase mode 0700.
+
+## Restore
+
+### From streamcompress
+
+For a restore the XtraBackup and the [qpress utility](https://ftpmirror.your.org/pub/percona/pxc-80/apt/pool/main/q/qpress/) utilities are required.
+
+1. Unpack the xbstream file:
+   ```bash
+    xbstream -x < /var/backups/percona/opa_20250821-021501/backup.xbstream -C /tmp/restore
+   ```
+   You will get the original mysql data directory structure, but all files are individually compressed.
+2. Decompress files
+   ```bash
+   xtrabackup --decompress --remove-original --target-dir=/tmp/restore
+   ```
+   Now you have the original and uncompressed table files. But these files are still not suitable to run a
+   database server. Data from the transaction log needs to be flushed to the tables.
+3. Apply logs aka prepare
+   ```bash
+   xtrabackup --prepare --target-dir=/tmp/restore
+   ```
+   Now you have a mysql data directory suitable to start your database server.
+4. Copy back and start MySQL
+   ```bash
+   sudo systemctl stop mysql
+   sudo mv /var/lib/mysql /var/lib/mysql.backup
+   xtrabackup --copy-back --target-dir=/tmp/restore
+   sudo chown -R mysql:mysql /var/lib/mysql
+   sudo systemctl start mysql
+   ```
 
 ## Authentication
 
