@@ -111,7 +111,7 @@ class TestEndToEnd(unittest.TestCase):
 
     def test_04_restore(self):
         # Restore from backup
-        subprocess.run("./test_data/restore_from_streamcompress.sh", shell=True, check=True)
+        subprocess.run("sudo ./test_data/restore_from_streamcompress.sh", shell=True, check=True)
 
     def __run_backup(self, config: str, expected_exit_code: int = 0):
         response = subprocess.run(
