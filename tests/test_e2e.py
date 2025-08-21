@@ -109,6 +109,10 @@ class TestEndToEnd(unittest.TestCase):
 
         self.assertEqual(subfolders, 0, "Subfolders not found in the backup")
 
+    def test_04_restore(self):
+        # Restore from backup
+        subprocess.run("./test_data/restore_from_streamcompress.sh", shell=True, check=True)
+
     def __run_backup(self, config: str, expected_exit_code: int = 0):
         response = subprocess.run(
             f"./opa -c test_data/{config}.conf",
