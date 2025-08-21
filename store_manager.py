@@ -46,7 +46,28 @@ class StoreManager:
         # Create new backup directory with timestamp
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         current_dir = os.path.join(backup_dir, f"{DIR_PREFIX}_{timestamp}")
-        os.makedirs(current_dir, exist_ok=True)
+
+        # Create directory with proper error handling
+        try:
+            # First ensure parent directory exists
+            parent_dir = os.path.dirname(current_dir)
+            if not os.path.exists(parent_dir):
+                os.makedirs(parent_dir, mode=0o755)
+
+            # Now create the backup directory
+            os.makedirs(current_dir, mode=0o755, exist_ok=False)
+        except FileExistsError:
+            # Directory already exists, this is ok
+            pass
+        except PermissionError as e:
+            raise RuntimeError(f"Permission denied creating backup directory {current_dir}: {e}")
+        except OSError as e:
+            raise RuntimeError(f"Failed to create backup directory {current_dir}: {e}")
+
+        # Verify directory was created successfully
+        if not os.path.exists(current_dir):
+            raise RuntimeError(f"Backup directory {current_dir} was not created successfully")
+
         self.current_dir = get_dir_info(os.path.join(backup_dir, f"{DIR_PREFIX}_{timestamp}"))
 
     def store_backup_info(self, mysql_data_dir_bytes_used: int):

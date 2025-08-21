@@ -43,7 +43,8 @@ class XtraBackup:
         Execute the XtraBackup command according to the configured strategy
         :return: BackupResult
         """
-        self.logger.debug(f"MySQL data directory: {self.mysql_info.data_dir}")
+        self.logger.debug(f"MySQL data directory: {self.mysql_info.data_dir.path}"
+                          f" ({format_bytes(self.mysql_info.data_dir.bytes_used)})")
         self.logger.info(f"Starting XtraBackup with strategy: streamcompress={self.config.streamcompress}, "
                          f"prepare={self.config.prepare}, tgz={self.config.tgz}")
 
@@ -81,8 +82,9 @@ class XtraBackup:
         # Regular backup needs approximately the same space as the data directory
         # Streamcompress reduces this significantly
         database_size = self.mysql_info.get_databases_size()
+        self.logger.debug(f"Database size: {database_size} bytes ({format_bytes(database_size)})")
         if self.config.streamcompress:
-            required_free_bytes = database_size * 0.3  # Estimate 30% for compressed
+            required_free_bytes = database_size * 0.25  # Estimate 25% for compressed
         else:
             required_free_bytes = database_size * 1.2  # Add 20% buffer for regular
             if self.config.tgz:
@@ -91,11 +93,13 @@ class XtraBackup:
 
         self.logger.info(
             f"Backup will require approximately {format_bytes(required_free_bytes)} bytes. "
-            f"Having {format_bytes(self.store_manager.current_dir.bytes_free)} free."
+            f"Having {format_bytes(self.store_manager.current_dir.bytes_free)} free "
+            f"in {self.store_manager.current_dir.path}"
         )
 
         if required_free_bytes > self.store_manager.current_dir.bytes_free:
-            raise NotEnoughDiskSpaceError("Not enough free space in target directory.")
+            raise NotEnoughDiskSpaceError(
+                f"Not enough free space in target directory: {self.store_manager.current_dir.path}")
         return True
 
     def _execute_regular(self) -> bool:
@@ -187,7 +191,15 @@ class XtraBackup:
 
     def _execute_streamcompress(self) -> bool:
         """Execute XtraBackup with stream compression"""
-        output_file = os.path.join(self.store_manager.current_dir.path, "backup.xbstream")
+        # Verify the output directory exists
+        output_dir = self.store_manager.current_dir.path
+        if not os.path.exists(output_dir):
+            self.logger.error(f"Output directory does not exist: {output_dir}")
+            return False
+        if not os.path.isdir(output_dir):
+            self.logger.error(f"Output path is not a directory: {output_dir}")
+            return False
+        output_file = os.path.join(output_dir, "backup.xbstream")
 
         # Build XtraBackup command with streaming and compression
         cmd_parts = [
