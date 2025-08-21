@@ -113,12 +113,16 @@ For a restore the XtraBackup and the [qpress utility](https://ftpmirror.your.org
    Now you have a mysql data directory suitable to start your database server.
 4. Copy back and start MySQL
    ```bash
+   DATADIR=$(mysql -Nse "SELECT @@datadir")
    sudo systemctl stop mysql
-   sudo mv /var/lib/mysql /var/lib/mysql.backup
-   xtrabackup --copy-back --target-dir=/tmp/restore
+   sudo mv "${DATADIR}" "${DATADIR}".backup
+   xtrabackup --copy-back --target-dir=/tmp/restore --datadir="${DATADIR}"
    sudo chown -R mysql:mysql /var/lib/mysql
    sudo systemctl start mysql
    ```
+
+> [!NOTE]
+> `--target-dir` always refers to where your backup is or should be stored.
 
 ## Authentication
 
